@@ -2,24 +2,19 @@ package org.yascode;
 
 import org.yascode.encryption.CryptoUtil;
 
-import javax.crypto.SecretKey;
-import java.util.Base64;
+import java.security.KeyPair;
 
 public class Main {
     public static void main(String[] args) throws Exception {
         String data = "This is my data";
 
-        String secret = "SfR4Xl8QIiWxsb00wyHhUIaIXEwcmIPd";
+        KeyPair keyPair = CryptoUtil.generateKeyPairRSA();
 
-        SecretKey secretKey = CryptoUtil.generateSecretKeyAES(secret);
+        byte[] encryptedData = CryptoUtil.encryptRSA(data.getBytes(), keyPair.getPublic());
 
-        byte[] dataEncrypted = CryptoUtil.encryptAES(data.getBytes(), secretKey);
+        byte[] decryptedData = CryptoUtil.decryptRSA(encryptedData, keyPair.getPrivate());
 
-        byte[] decryptedData = CryptoUtil.decryptAES(dataEncrypted, secretKey);
-
-        System.out.println(Base64.getEncoder().encodeToString(dataEncrypted));
         System.out.println(new String(decryptedData));
-
     }
 
 }

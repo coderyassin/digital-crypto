@@ -4,9 +4,8 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.util.Base64;
-import java.util.Formatter;
 
 public class CryptoUtil {
     public static String encodeToBase64(byte[] data){
@@ -62,5 +61,35 @@ public class CryptoUtil {
 
     public static byte[] decryptAES(byte[] encryptedData, SecretKey secretKey) throws Exception {
         return decrypt(encryptedData, secretKey, "AES");
+    }
+
+    public static KeyPair generateKeyPair(String algorithm) throws Exception {
+        KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(algorithm);
+        keyPairGen.initialize(2048);
+        return keyPairGen.generateKeyPair();
+    }
+
+    public static KeyPair generateKeyPairRSA() throws Exception {
+        return generateKeyPair("RSA");
+    }
+
+    public static byte[] encrypt(byte[] data, PublicKey publicKey, String algorithm) throws Exception {
+        Cipher cipher = Cipher.getInstance(algorithm);
+        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+        return cipher.doFinal(data);
+    }
+
+    public static byte[] encryptRSA(byte[] data, PublicKey publicKey) throws Exception {
+        return encrypt(data, publicKey, "RSA");
+    }
+
+    public static byte[] decrypt(byte[] encryptedData, PrivateKey privateKey, String algorithm) throws Exception {
+        Cipher cipher = Cipher.getInstance(algorithm);
+        cipher.init(Cipher.DECRYPT_MODE, privateKey);
+        return cipher.doFinal(encryptedData);
+    }
+
+    public static byte[] decryptRSA(byte[] encryptedData, PrivateKey privateKey) throws Exception {
+        return decrypt(encryptedData, privateKey, "RSA");
     }
 }
