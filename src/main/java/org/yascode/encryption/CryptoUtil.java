@@ -4,7 +4,12 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.FileInputStream;
 import java.security.*;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 public class CryptoUtil {
@@ -91,5 +96,41 @@ public class CryptoUtil {
 
     public static byte[] decryptRSA(byte[] encryptedData, PrivateKey privateKey) throws Exception {
         return decrypt(encryptedData, privateKey, "RSA");
+    }
+
+    public static PublicKey generatePublicKey(byte[] publicKey, String algorithm) throws Exception {
+        return KeyFactory.getInstance(algorithm)
+                .generatePublic(new X509EncodedKeySpec(publicKey));
+    }
+
+    public static PublicKey generatePublicKeyRSA(byte[] publicKey) throws Exception {
+        return generatePublicKey(publicKey, "RSA");
+    }
+
+    public static PublicKey generatePublicKeyRSA(String publicKey) throws Exception {
+        byte[] decodePublicKey = Base64.getDecoder().decode(publicKey);
+        return generatePublicKey(decodePublicKey, "RSA");
+    }
+
+    public static PrivateKey generatePrivateKey(byte[] privateKey, String algorithm) throws Exception {
+        return KeyFactory.getInstance(algorithm)
+                .generatePrivate(new PKCS8EncodedKeySpec(privateKey));
+    }
+
+    public static PrivateKey generatePrivateKeyRSA(byte[] privateKey) throws Exception {
+        return generatePrivateKey(privateKey, "RSA");
+    }
+
+    public static PrivateKey generatePrivateKeyRSA(String privateKey) throws Exception {
+        byte[] decodedPrivateKey = Base64.getDecoder().decode(privateKey);
+        return generatePrivateKey(decodedPrivateKey, "RSA");
+    }
+
+    public static PublicKey publicKeyFromCertificate(String certificatePath) throws Exception {
+        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+        try (FileInputStream fis = new FileInputStream(certificatePath)) {
+            Certificate certificate = certificateFactory.generateCertificate(fis);
+            return certificate.getPublicKey();
+        }
     }
 }
