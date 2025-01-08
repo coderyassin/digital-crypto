@@ -6,21 +6,28 @@ import java.io.FileOutputStream;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
 public class KeyStoreUtil {
     private static final String KEY_STORE_PASSWORD = "0112358132134";
     private static final String KEY_STORE_PATH = "src/main/resources/keyStore/";
 
-    public static void savePrivateKey(KeyPair keyPair,
+    public static void buildCertificate(KeyPair keyPair,
+                                        String KeystoreName,
+                                        String alias,
+                                        CertificateInformation certificateInformation) throws Exception {
+
+        X509Certificate certificate = CertificateGenerator.createSelfSignedCertificate(keyPair, certificateInformation);
+
+
+        savePrivateKey(certificate, keyPair, KeystoreName, alias);
+    }
+
+    public static void savePrivateKey(X509Certificate certificate,
+                                      KeyPair keyPair,
                                       String KeystoreName,
-                                      String alias,
-                                      String commonName,
-                                      String organizationalUnit,
-                                      String organization,
-                                      String locality,
-                                      String state,
-                                      String country) throws Exception {
+                                      String alias) throws Exception {
         KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
         FileInputStream keyStoreFile = null;
 
@@ -31,14 +38,6 @@ public class KeyStoreUtil {
         } else {
             keyStore.load(null, null);  // New keystore, if file does not exist
         }
-
-        X509Certificate certificate = CertificateGenerator.createSelfSignedCertificate(keyPair,
-                commonName,
-                organizationalUnit,
-                organization,
-                locality,
-                state,
-                country);
 
         KeyStore.PrivateKeyEntry privateKeyEntry =
                 new KeyStore.PrivateKeyEntry(keyPair.getPrivate(), new java.security.cert.Certificate[]{certificate});
@@ -52,11 +51,19 @@ public class KeyStoreUtil {
         System.out.println("Private key successfully saved to Keystore.");
     }
 
-    public static PrivateKey retrievePrivateKey(String keystore,
-                                          String alias) throws Exception {
+    public static PrivateKey retrievePrivateKey(String keystore, String alias) throws Exception {
+        KeyStore keyStore = loadKeyStore(keystore);
+        return  (PrivateKey) keyStore.getKey(alias, KEY_STORE_PASSWORD.toCharArray());
+    }
+
+    public static Certificate retrieveCertificate(String keystore, String alias) throws Exception {
+        KeyStore keyStore = loadKeyStore(keystore);
+        return keyStore.getCertificate(alias);
+    }
+
+    private static KeyStore loadKeyStore(String keystore) throws Exception {
         KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
         keyStore.load(new FileInputStream(KEY_STORE_PATH + keystore), KEY_STORE_PASSWORD.toCharArray());
-
-        return  (PrivateKey) keyStore.getKey(alias, KEY_STORE_PASSWORD.toCharArray());
+        return keyStore;
     }
 }
