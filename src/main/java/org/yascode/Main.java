@@ -19,7 +19,7 @@ public class Main {
     private static final String STATE = "casablanca";
     private static final String COUNTRY = "MR";
 
-    public static void main(String[] args) throws Exception {
+    public static void test1(String[] args) throws Exception {
         String data = "This is my data";
 
         Certificate certificate = KeyStoreUtil.retrieveCertificate(KEYSTORE_NAME, ALIAS);
@@ -34,6 +34,18 @@ public class Main {
 
         System.out.println(new String(decryptedData));
 
+    }
+
+    public static void test2(String[] args) throws Exception {
+        String data = "This is my data";
+
+        byte[] secretKey = "123456".getBytes();
+
+        byte[] signature = CryptoUtil.createHMACSignature(data.getBytes(), secretKey);
+
+        boolean verifyDigitalSignature = CryptoUtil.verifyHMACSignature(data.getBytes(), signature, secretKey);
+
+        System.out.println(verifyDigitalSignature);
     }
 
     private static CertificateInformation buildCertificateInformation() {

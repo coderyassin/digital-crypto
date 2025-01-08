@@ -2,6 +2,7 @@ package org.yascode.encryption;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
+import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.FileInputStream;
@@ -10,6 +11,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 import java.util.Base64;
 
 public class CryptoUtil {
@@ -132,5 +134,34 @@ public class CryptoUtil {
             Certificate certificate = certificateFactory.generateCertificate(fis);
             return certificate.getPublicKey();
         }
+    }
+
+    public static byte[] createDigitalSignature(byte[] data, PrivateKey privateKey) throws Exception {
+        Signature signature = Signature.getInstance("SHA256withRSA");
+        signature.initSign(privateKey);
+        signature.update(data);
+        return signature.sign();
+    }
+
+    public static boolean verifyDigitalSignature(byte[] data,
+                                                 byte[] digitalSignature,
+                                                 PublicKey publicKey
+                                                 ) throws Exception {
+        Signature verification = Signature.getInstance("SHA256withRSA");
+        verification.initVerify(publicKey);
+        verification.update(data);
+        return verification.verify(digitalSignature);
+    }
+
+    public static byte[] createHMACSignature(byte[] data, byte[] secretKey) throws Exception {
+        SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey, "HmacSHA256");
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(secretKeySpec);
+        return mac.doFinal(data);
+    }
+
+    public static boolean verifyHMACSignature(byte[] data, byte[] signature, byte[] secretKey) throws Exception{
+        byte[] hmacSignature = createHMACSignature(data, secretKey);
+        return Arrays.equals(hmacSignature, signature);
     }
 }
