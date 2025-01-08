@@ -9,6 +9,7 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 
 public class Main {
+    private final static String CERTIFICATE_NAME = "certificate.pem";
     private static final String KEYSTORE_NAME = "yasCodeKS.jks";
     private static final String ALIAS = "alias3";
     private static final String COMMON_NAME = "yascode.ja";
@@ -23,7 +24,7 @@ public class Main {
 
         Certificate certificate = KeyStoreUtil.retrieveCertificate(KEYSTORE_NAME, ALIAS);
 
-        CertificateGenerator.saveCertificate(certificate, "src/main/resources/certificates/certificate.pem");
+        CertificateGenerator.saveCertificate(certificate, CERTIFICATE_NAME);
 
         byte[] encryptedData = CryptoUtil.encryptRSA(data.getBytes(), certificate.getPublicKey());
 
@@ -35,7 +36,7 @@ public class Main {
 
     }
 
-    private static CertificateInformation getCertificateInformation() {
+    private static CertificateInformation buildCertificateInformation() {
         return new CertificateInformation.Builder()
                 .commonName(COMMON_NAME)
                 .organizationalUnit(ORGANIZATIONAL_UNIT)

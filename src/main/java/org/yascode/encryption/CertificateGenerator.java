@@ -19,8 +19,10 @@ import java.util.Base64;
 import java.util.Date;
 
 public class CertificateGenerator {
+    private final static String CERTIFICATE_PATH = "src/main/resources/certificates/";
 
-    public static void generateCertificate(CertificateInformation certificateInformation, String certificatePath) throws Exception {
+    public static void generateCertificate(CertificateInformation certificateInformation,
+                                           String certificatePath) throws Exception {
         Security.addProvider(new BouncyCastleProvider());
 
         // Generate an RSA key pair
@@ -33,12 +35,12 @@ public class CertificateGenerator {
 
     }
 
-    public static void saveCertificate(Certificate certificate, String certificatePath) throws Exception {
+    public static void saveCertificate(Certificate certificate, String certificateName) throws Exception {
         String certPem = "-----BEGIN CERTIFICATE-----\n" +
                 Base64.getEncoder().encodeToString(certificate.getEncoded()) + "\n" +
                 "-----END CERTIFICATE-----";
 
-        try (FileOutputStream fos = new FileOutputStream(certificatePath)) {
+        try (FileOutputStream fos = new FileOutputStream(CERTIFICATE_PATH + certificateName)) {
             fos.write(certPem.getBytes());
         }
     }
