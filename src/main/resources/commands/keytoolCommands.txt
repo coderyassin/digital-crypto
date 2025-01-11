@@ -1,5 +1,7 @@
 keytool -genkey -alias yascode -keyalg RSA -keystore ychjmm.jks -keysize 2048
 
+keytool -genkeypair -alias yascode -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore keystore.p12 -validity 365
+
 keytool -export -alias yascode -keystore ychjmm.jks -rfc -file certif.cert
 
 *****************************************************************************

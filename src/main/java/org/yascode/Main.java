@@ -1,12 +1,18 @@
 package org.yascode;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.yascode.encryption.CertificateGenerator;
 import org.yascode.encryption.CertificateInformation;
 import org.yascode.encryption.CryptoUtil;
 import org.yascode.encryption.KeyStoreUtil;
 
 import java.security.PrivateKey;
+import java.security.SecureRandom;
 import java.security.cert.Certificate;
+import java.util.Base64;
+
+import static org.springframework.security.crypto.password.Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA256;
 
 public class Main {
     private final static String CERTIFICATE_NAME = "certificate.pem";
@@ -46,6 +52,20 @@ public class Main {
         boolean verifyDigitalSignature = CryptoUtil.verifyHMACSignature(data.getBytes(), signature, secretKey);
 
         System.out.println(verifyDigitalSignature);
+    }
+
+    public static void main(String[] args) throws Exception {
+        String password = "123456";
+        int strength = 14;
+        SecureRandom random1 = SecureRandom.getInstance("SHA1PRNG");
+        SecureRandom random2 = SecureRandom.getInstance("Windows-PRNG");
+
+        BCryptPasswordEncoder encoder1 = new BCryptPasswordEncoder(strength, random1);
+        BCryptPasswordEncoder encoder2 = new BCryptPasswordEncoder(strength, random2);
+
+        String encodedPassword = encoder1.encode(password);
+
+        System.out.println(encoder2.matches(password, encodedPassword));
     }
 
     private static CertificateInformation buildCertificateInformation() {

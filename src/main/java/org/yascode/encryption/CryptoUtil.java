@@ -1,9 +1,12 @@
 package org.yascode.encryption;
 
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
+import de.mkammerer.argon2.Argon2;
+import de.mkammerer.argon2.Argon2Factory;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import javax.crypto.*;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.FileInputStream;
 import java.security.*;
@@ -163,5 +166,47 @@ public class CryptoUtil {
     public static boolean verifyHMACSignature(byte[] data, byte[] signature, byte[] secretKey) throws Exception{
         byte[] hmacSignature = createHMACSignature(data, secretKey);
         return Arrays.equals(hmacSignature, signature);
+    }
+
+    public static byte[] calculateHash(byte[] data, String algorithm) throws Exception {
+        MessageDigest digest = MessageDigest.getInstance(algorithm);
+        return digest.digest(data);
+    }
+
+    public static byte[] calculateHashSHA_256(byte[] data) throws Exception {
+        return calculateHash(data, "SHA-256");
+    }
+
+    public static byte[] generateSecureRandomSalt(int length) throws Exception {
+        SecureRandom random = SecureRandom.getInstanceStrong();
+        byte[] saltBytes = new byte[length];
+        random.nextBytes(saltBytes);
+        return saltBytes;
+    }
+
+    public static byte[] slowHashingPBKDF2(String password, byte[] salt, int iterations, int keyLength) throws Exception {
+        PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, iterations, keyLength);
+        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        return factory.generateSecret(spec).getEncoded();
+    }
+
+    public static String slowHashingBcrypt(String password, int strength) throws Exception {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(strength);
+        return encoder.encode(password);
+    }
+
+    public static boolean verifyHashBcrypt(String password, String encodedPassword) throws Exception {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        return encoder.matches(password, encodedPassword);
+    }
+
+    public static String slowHashingArgon2(String password, int iterations, int memory, int parallelism) throws Exception {
+        Argon2 argon2 = Argon2Factory.create();
+        return argon2.hash(iterations, memory, parallelism, password);
+    }
+
+    public static boolean verifyHashArgon2(String password, String encodedPassword) throws Exception {
+        Argon2 argon2 = Argon2Factory.create();
+        return argon2.verify(encodedPassword, password);
     }
 }
